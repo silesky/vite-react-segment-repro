@@ -1,15 +1,15 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React from "react";
+import { AnalyticsBrowser } from "@segment/analytics-next";
 import logo from "./logo.svg";
 import "./App.css";
 
-import { AnalyticsBrowser } from "@segment/analytics-next";
-
 const AnalyticsContext = React.createContext<AnalyticsBrowser>(undefined!);
 
-export const AnalyticsProvider: React.FC<{
+type Props = {
   writeKey: string;
-  children: ReactElement;
-}> = ({ children, writeKey }) => {
+  children: React.ReactNode;
+};
+export const AnalyticsProvider = ({ children, writeKey }: Props) => {
   const analytics = React.useMemo(
     () => AnalyticsBrowser.load({ writeKey }),
     [writeKey]
@@ -29,9 +29,9 @@ export const useAnalytics = () => {
   }
   return result;
 };
-
 function App() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = React.useState(0);
+
   const analytics = useAnalytics();
   return (
     <div className="App">
@@ -39,7 +39,13 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
         <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
+          <button
+            type="button"
+            onClick={() => {
+              setCount((count) => count + 1);
+              void analytics.track("count").then(console.log);
+            }}
+          >
             count is: {count}
           </button>
         </p>
@@ -70,7 +76,7 @@ function App() {
   );
 }
 
-export default (
+export default () => (
   <AnalyticsProvider writeKey="9lSrez3BlfLAJ7NOChrqWtILiATiycoc">
     <App />
   </AnalyticsProvider>
